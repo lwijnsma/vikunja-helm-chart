@@ -1,9 +1,31 @@
 {{- define "vikunja.vikunja.hardcodedValues" -}}
+controllers:
+  main:
+    containers:
+      main:
+        image:
+          repository: vikunja/vikunja
+          tag: {{ default .Chart.AppVersion .Values.image.tag }}
+          pullPolicy: IfNotPresent
+
+        probes:
+          liveness: &probes
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /api/v1/info
+                port: http
+              initialDelaySeconds: 0
+              periodSeconds: 10
+              timeoutSeconds: 1
+              failureThreshold: 3
+          readiness: *probes
+          startup:
+            enabled: false
+
 service:
   main:
-    controller: main
-    enabled: true
-    primary: true
     type: ClusterIP
     ports:
       http:
@@ -24,23 +46,6 @@ persistence:
     name: "{{ .Release.Name }}-config"
     mountPath: /etc/vikunja/config.yml
     subPath: config.yml
-
-probes:
-  liveness: &probes
-    enabled: true
-    custom: true
-    spec:
-      httpGet:
-        path: /api/v1/info
-        port: http
-      initialDelaySeconds: 0
-      periodSeconds: 10
-      timeoutSeconds: 1
-      failureThreshold: 3
-  readiness: *probes
-  startup:
-    enabled: false
-
 
 env:
 {{ if eq .Values.vikunja.env.VIKUNJA_DATABASE_TYPE "sqlite" }}
