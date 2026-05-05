@@ -5,7 +5,7 @@ controllers:
       main:
         image:
           repository: vikunja/vikunja
-          tag: {{ default .Chart.AppVersion .Values.image.tag }}
+          tag: {{ default .Chart.AppVersion }}
           pullPolicy: IfNotPresent
 
         probes:
